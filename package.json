@@ -1,13 +1,13 @@
 {
   "name": "spa-font-spider-webpack-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "一个基于font-spider的，适用于SPA项目动态渲染页面中web字体提取、压缩的webpack插件",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "font-spider、SPA、动态字符、webpack、webpack-plugin"
+    "font-spider、SPA、动态字符、webpack、webpack-plugin、@font-face"
   ],
   "author": "zzs",
   "license": "ISC",

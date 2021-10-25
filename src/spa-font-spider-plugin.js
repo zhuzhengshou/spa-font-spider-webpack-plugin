@@ -20,6 +20,8 @@ class SPAFontSpliderPlugin {
   constructor (options = {}) {
     if (options.urlList) {
       options.urlList = Array.from(new Set(defaultUrlList.concat(options.urlList)))
+    } else {
+      options.urlList = defaultUrlList
     }
     optionCheckResult = this.optionsCheck(options)
     if (optionCheckResult) {
