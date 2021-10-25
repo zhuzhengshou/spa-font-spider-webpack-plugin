@@ -9,7 +9,7 @@ const { getCanUseServerHost, closeServer } = require('./core/liveServer')
 const crawling = require('./core/crawling')
 const fsHandler = require('./core/fsHandler')
 const { isFontFamilyPkg, getuuid } = require('./utils')
-const { defaultPluginOption, devTmpPath, pluginName, safeFontType } = require('./config')
+const { defaultPluginOption, defaultUrlList, devTmpPath, pluginName, safeFontType } = require('./config')
 
 let isSuccessLoad
 let assets
@@ -18,11 +18,11 @@ let optionCheckResult
 
 class SPAFontSpliderPlugin {
   constructor (options = {}) {
+    if (options.urlList) {
+      options.urlList = Array.from(new Set(defaultUrlList.concat(options.urlList)))
+    }
     optionCheckResult = this.optionsCheck(options)
     if (optionCheckResult) {
-      if (!options.isDev) {
-        options.isDev = process.env.NODE_ENV === 'development'
-      }
       options.fontPkgUrlMapFileName = options.fontFamilyPkgList.reduce((prev, { url }) => {
         prev[url] = `${getuuid()}.${safeFontType}`
         return prev
@@ -60,7 +60,6 @@ class SPAFontSpliderPlugin {
         return false
       } else {
         let url
-        urlList = Array.from(new Set(urlList.concat(defaultPluginOption.urlList)))
         for (let i = urlList.length - 1; i >= 0; i--) {
           url = urlList[i]
           if (url && !url.startsWith('/')) {
