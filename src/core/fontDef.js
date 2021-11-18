@@ -3,11 +3,12 @@
  * 2.字体包的url要加上?iefix，避免被html解析器解析到 src后面的format(IE低版本不支持)
  * 3.提取的字体包定义的代码(@font-face)需要一次性插入html，全量的字体包，竞速优先插入
  */
-const {
+ const {
   crawlingUserAgent,
   safeFontType,
   pluginName
 } = require('../config')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 const chalk = require('chalk')
 const fs = require('fs')
 const path = require('path')
@@ -29,7 +30,7 @@ function getSignleFontDefStr (url, name) {
     font-display: swap; /* 解决FOIT (Flash Of Invisible Text) */
   }`
 }
-function genCSS (htmlPluginData, callback, {fontFamilyPkgList, fontPkgUrlMapFileName}) {
+function _fontDef (htmlPluginData, callback, {fontFamilyPkgList, fontPkgUrlMapFileName}) {
   const partFontDef = fontFamilyPkgList.reduce((prev, { url, name }) => {
     return prev += getSignleFontDefStr(fontPkgUrlMapFileName[url], name)
   }, ``)
@@ -68,20 +69,28 @@ function genCSS (htmlPluginData, callback, {fontFamilyPkgList, fontPkgUrlMapFile
 }
 module.exports = (compiler, options) => {
   if (compiler.hooks) {
-    // webpack 4.x+
+    // webpack 4.x+ , 4.x+版本的webpack要考虑 3.x版本以上的html-webpack-plugin
     compiler.hooks.compilation.tap(pluginName, compilation => {
-      if (!compilation.hooks.htmlWebpackPluginBeforeHtmlProcessing) {
-        console.error(`${pluginName} must be placed after HtmlWebpackPlugin in \`webpack plugins\`.`)
-        return
+      if (HtmlWebpackPlugin.version) {
+        // 有大版本标注的为4.x+
+        HtmlWebpackPlugin.getHooks(compilation).beforeEmit.tapAsync(pluginName, (htmlPluginData, callback) => {
+          _fontDef(htmlPluginData, callback, options)
+        })
+      } else {
+        if (!compilation.hooks.htmlWebpackPluginBeforeHtmlProcessing) {
+          console.error(`${pluginName} must be placed after HtmlWebpackPlugin in \`webpack plugins\`.`)
+          return
+        }
+        compilation.hooks.htmlWebpackPluginBeforeHtmlProcessing.tapAsync(pluginName, (htmlPluginData, callback) => {
+          _fontDef(htmlPluginData, callback, options)
+        })
       }
-      compilation.hooks.htmlWebpackPluginBeforeHtmlProcessing.tapAsync(pluginName, (htmlPluginData, callback) => {
-        genCSS(htmlPluginData, callback, options)
-      })
     })
   } else {
+    // webpack 4以下，以及依赖他的html-webpack-plugin 3.x以下
     compiler.plugin('compilation', compilation => {
       compilation.plugin('html-webpack-plugin-before-html-processing', (htmlPluginData, callback) => {
-        genCSS(htmlPluginData, callback, options)
+        _fontDef(htmlPluginData, callback, options)
       })
     })
   }
