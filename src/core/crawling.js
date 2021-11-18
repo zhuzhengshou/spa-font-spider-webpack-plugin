@@ -44,8 +44,12 @@ module.exports = ({serverHost, pluginOptions}) => {
               ]
             })
           } catch (e) {
-            console.log(chalk.red(`\n待提取字体的h5页面资源请求链接失败，错误页面url路径:${url.replace(serverHost, '')}\n`))
-            reject(e)
+            if (e.message.includes('timeout')) {
+              console.log(chalk.red(`\n待提取字体的h5页面资源请求链接在30s内超时，可能未爬取完整，错误页面url路径:${url.replace(serverHost, '')}，请根据提取出的字符判断已爬取的内容是否符合所需\n`))
+            } else {
+              console.log(chalk.red(`\n待提取字体的h5页面资源请求链接失败，错误页面url路径:${url.replace(serverHost, '')}\n`))
+              reject(e)
+            }
           }
           await page.content().then((content)=>{
             const absoulteUri = path.join(devTmpPath, `crawling-${getuuid()}.html`)
