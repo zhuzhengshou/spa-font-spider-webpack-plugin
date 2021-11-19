@@ -30,7 +30,10 @@ function getSignleFontDefStr (url, name) {
     font-display: swap; /* 解决FOIT (Flash Of Invisible Text) */
   }`
 }
-function _fontDef (htmlPluginData, callback, {fontFamilyPkgList, fontPkgUrlMapFileName}) {
+function _fontDef (htmlPluginData, callback, {fontFamilyPkgList, fontPkgUrlMapFileName, preload, complete}) {
+  let dependenceCode
+  // 预加载缩量包
+  const preloadPartFontCode = fontFamilyPkgList.map(({ url }) => `<link rel='preload' href='./${fontPkgUrlMapFileName[url]}${ieSuffix}' as='font'></link>`).join('')
   const partFontDef = fontFamilyPkgList.reduce((prev, { url, name }) => {
     return prev += getSignleFontDefStr(fontPkgUrlMapFileName[url], name)
   }, ``)
@@ -50,22 +53,25 @@ function _fontDef (htmlPluginData, callback, {fontFamilyPkgList, fontPkgUrlMapFi
     headEle.appendChild(linkEle)
     `
   }, ``)
-  const script = `
-    ${fontFamilyPkgList.map(({ url }) => `<link rel='preload' href='./${fontPkgUrlMapFileName[url]}${ieSuffix}' as='font'></link>`).join('')}
-    <style>
-      ${partFontDef}
-    </style>
-    <script>
-      // 避免爬取的时候加载全量包
-      if (navigator.userAgent !== '${crawlingUserAgent}') {
-        const headEle = document.querySelector('head')
-        ${fullFontDef}
-      }
-    </script>
-    `
-    const headTagEndPos = htmlPluginData.html.lastIndexOf('</head>')
-    htmlPluginData.html = insertAt(htmlPluginData.html, script, headTagEndPos)
-    callback(null, htmlPluginData)
+  // 后加载全量包
+  const completeFontCode = `<script>
+    // 避免爬取的时候加载全量包
+    if (navigator.userAgent !== '${crawlingUserAgent}') {
+      const headEle = document.querySelector('head')
+      ${fullFontDef}
+    }
+  </script>`
+  let dynamicCode = `<style>${partFontDef}</style>`
+  if (preload) {
+    dependenceCode += preloadPartFontCode
+  }
+  dependenceCode += `<style>${partFontDef}</style>`
+  if (complete) {
+    dependenceCode += completeFontCode
+  }
+  const headTagEndPos = htmlPluginData.html.lastIndexOf('</head>')
+  htmlPluginData.html = insertAt(htmlPluginData.html, dependenceCode, headTagEndPos)
+  callback(null, htmlPluginData)
 }
 module.exports = (compiler, options) => {
   if (compiler.hooks) {

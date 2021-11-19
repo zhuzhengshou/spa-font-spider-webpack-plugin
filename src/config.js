@@ -7,5 +7,7 @@ exports.defaultUrlList = ['/']
 exports.defaultPluginOption = {
   silent: true,
   isDev: process.env.NODE_ENV === 'development',
-  hot: false
+  hot: false,
+  preload: false,
+  complete: true
 }

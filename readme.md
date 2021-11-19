@@ -112,6 +112,16 @@ module.exports = {
   urlList: ['/'],
   /**
    * @type { Boolean }
+   * @desc 是否对首屏所需的缩量字体包进行预加载。当你完全不希望出现字体闪烁时，请设为true，当你希望首屏加载速度相对快一些,请设为false
+  */
+  preload: false,
+  /**
+   * @type { Boolean }
+   * @desc 是否需要全量包，当你认为首屏解析产生的所量字体包已经足够你所需的时候，请设置为false，避免多余的大文件网络请求带来的影响
+  */
+  complete: true,
+  /**
+   * @type { Boolean }
    * @desc 当前插件是否要运行在webpack-dev-server所搭建的服务中
   */
   isDev: process.env.NODE_ENV === 'development',
