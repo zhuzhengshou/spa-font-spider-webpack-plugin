@@ -31,7 +31,7 @@ function getSignleFontDefStr (url, name) {
   }`
 }
 function _fontDef (htmlPluginData, callback, {fontFamilyPkgList, fontPkgUrlMapFileName, preload, complete}) {
-  let dependenceCode
+  let dependenceCode = ``
   // 预加载缩量包
   const preloadPartFontCode = fontFamilyPkgList.map(({ url }) => `<link rel='preload' href='./${fontPkgUrlMapFileName[url]}${ieSuffix}' as='font'></link>`).join('')
   const partFontDef = fontFamilyPkgList.reduce((prev, { url, name }) => {
@@ -61,7 +61,6 @@ function _fontDef (htmlPluginData, callback, {fontFamilyPkgList, fontPkgUrlMapFi
       ${fullFontDef}
     }
   </script>`
-  let dynamicCode = `<style>${partFontDef}</style>`
   if (preload) {
     dependenceCode += preloadPartFontCode
   }
