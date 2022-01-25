@@ -4,7 +4,7 @@
 
 优势：
   * 使用于SPA项目
-  * 解决了FOIT (Flash Of Invisible Text)和FOIT (Flash Of Invisible Text)的问题
+  * 解决了FOIT (Flash Of Invisible Text)和FOUT (Flash Of Unstyled Text)的问题
   * 解决项目中的动态中文字符(接口返回)
   * 集成于webpack打包流程中，不需打包后额外操作
 
